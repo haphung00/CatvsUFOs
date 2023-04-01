@@ -20,17 +20,14 @@ public class Player extends GameObject
 	}	
 
 	public void move(int rowStep, int colStep)
-	{
-		gameBoard.getBoard()[this.row][this.col] = null;
-		
+	{		
 		if (GameBoard.isValidPosition(row + rowStep, col + colStep)) {
+			gameBoard.getBoard()[this.row][this.col] = null;
 			row += rowStep;
 			col += colStep;
 		}
 		
 		gameBoard.getBoard()[this.row][this.col] = this;
-		
-		System.out.println(row + " " + col);
 	}
 	
 	public void teleport()

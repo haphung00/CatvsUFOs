@@ -1,11 +1,12 @@
 package view_controller;
 
-import java.beans.EventHandler;
 import java.util.ArrayList;
 
-import javafx.scene.Scene;
+import javafx.beans.InvalidationListener;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -19,18 +20,20 @@ public class GameView extends Pane
 {
 	public static final int WIDTH = 600;
 	public static final int HEIGHT = 400;
-	
+
 	private static final Color DARK_SHADE = Color.SKYBLUE;
 	private static final Color LIGHT_SHADE = Color.LIGHTBLUE;
 	private static final int PREF_BLOCK_SIZE = 20;
-	
+
 	private GameBoard gameBoard;
 	private Player player;
 	private ArrayList<Robot> robots;
 	private ArrayList<Rubble> rubbles;
 
+	GameObjectImageView playerImageView;
+
 	public GameView(GameBoard gb)
-	{		
+	{
 		setPrefWidth(PREF_BLOCK_SIZE * GameBoard.COLS);
 		setPrefHeight(PREF_BLOCK_SIZE * GameBoard.ROWS);
 
@@ -38,8 +41,30 @@ public class GameView extends Pane
 		player = gameBoard.getPlayer();
 		robots = gameBoard.getRobots();
 		rubbles = gameBoard.getRubbles();
-		
+
 		render();
+		
+		setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.SPACE) {
+				gameBoard.play(GameBoard.TELEPORT, 0, 0);
+			}
+			else if (e.getText().equals("e")) {
+				gameBoard.play(GameBoard.MOVE, -1, 0);
+			}
+			else if (e.getText().equals("f")) {
+				gameBoard.play(GameBoard.MOVE, 0, 1);
+			}
+			else if (e.getText().equals("c")) {
+				gameBoard.play(GameBoard.MOVE, 1, 0);
+			}
+			else if (e.getText().equals("s")) {
+				gameBoard.play(GameBoard.MOVE, 0, -1);
+			}
+			
+			playerImageView.setX(player.getCol() * PREF_BLOCK_SIZE);
+			playerImageView.setY(player.getRow() * PREF_BLOCK_SIZE);
+
+		});
 	}
 
 	public void render()
@@ -62,45 +87,71 @@ public class GameView extends Pane
 				getChildren().add(rectangle);
 			}
 		}
-		
+
 		// render the player
 		Image playerImage = player.getImage();
-		ImageView playerImageView = new ImageView(playerImage);
-		playerImageView.setX(player.getCol() * PREF_BLOCK_SIZE);
-		playerImageView.setY(player.getRow() * PREF_BLOCK_SIZE);
-		playerImageView.setFitWidth(PREF_BLOCK_SIZE);
-		playerImageView.setFitHeight(PREF_BLOCK_SIZE);
+		playerImageView = new GameObjectImageView(playerImage);
+		playerImageView.setGameObject(player);
+
+		InvalidationListener listener = e -> {
+			for (Node node : getChildren()) {
+				if (node instanceof GameObjectImageView) {
+					((GameObjectImageView) node).update();
+				}
+			}
+		};
 		
+		playerImageView.xProperty().addListener(listener);
+		playerImageView.yProperty().addListener(listener);
+
 		getChildren().add(playerImageView);
-		
+
 		// render the robots
 		for (Robot robot : robots) {
-			int row = robot.getRow();
-			int col = robot.getCol();
-			
 			Image robotImage = robot.getImage();
-			ImageView robotImageView = new ImageView(robotImage);
-			robotImageView.setX(col * PREF_BLOCK_SIZE);
-			robotImageView.setY(row * PREF_BLOCK_SIZE);
-			robotImageView.setFitWidth(PREF_BLOCK_SIZE);
-			robotImageView.setFitHeight(PREF_BLOCK_SIZE);
-			
+			GameObjectImageView robotImageView = new GameObjectImageView(robotImage);
+			robotImageView.setGameObject(robot);
+
 			getChildren().add(robotImageView);
 		}
-		
+
 		// render the rubbles
 		for (Rubble rubble : rubbles) {
-			int row = rubble.getRow();
-			int col = rubble.getCol();
-			
 			Image rubbleImage = rubble.getImage();
-			ImageView rubbleImageView = new ImageView(rubbleImage);
-			rubbleImageView.setX(col * PREF_BLOCK_SIZE);
-			rubbleImageView.setY(row * PREF_BLOCK_SIZE);
-			rubbleImageView.setFitWidth(PREF_BLOCK_SIZE);
-			rubbleImageView.setFitHeight(PREF_BLOCK_SIZE);
-			
+			GameObjectImageView rubbleImageView = new GameObjectImageView(rubbleImage);
+			rubbleImageView.setGameObject(rubble);
+
 			getChildren().add(rubbleImageView);
+		}
+	}
+
+	class GameObjectImageView extends ImageView
+	{
+		GameObject gameObject;
+
+		GameObjectImageView(Image image)
+		{
+			super(image);
+		}
+
+		void setGameObject(GameObject gameObject)
+		{
+			this.gameObject = gameObject;
+			setX(gameObject.getCol() * PREF_BLOCK_SIZE);
+			setY(gameObject.getRow() * PREF_BLOCK_SIZE);
+			setFitWidth(PREF_BLOCK_SIZE);
+			setFitHeight(PREF_BLOCK_SIZE);
+		}
+		
+		void update()
+		{
+			if (gameObject.getOnBoard()) {
+				setX(gameObject.getCol() * PREF_BLOCK_SIZE);
+				setY(gameObject.getRow() * PREF_BLOCK_SIZE);
+			}
+			else {
+				setOpacity(0);
+			}
 		}
 	}
 }

@@ -7,12 +7,14 @@ public abstract class GameObject
 	protected int row;
 	protected int col;
 	protected GameBoard gameBoard;
+	protected boolean isOnBoard;
 	
 	public GameObject(int row, int col, GameBoard gameBoard)
 	{
 		this.row = row;
 		this.col = col;
 		this.gameBoard = gameBoard;
+		isOnBoard = true;
 	}
 	
 	public int getRow()
@@ -24,15 +26,15 @@ public abstract class GameObject
 	{
 		return col;
 	}
-
-	public void setRow(int row)
+	
+	public boolean getOnBoard()
 	{
-		this.row = row;
+		return isOnBoard;
 	}
-
-	public void setCol(int col)
+	
+	public void setOffBoard()
 	{
-		this.col = col;
+		this.isOnBoard = false;
 	}
 	
 	public abstract Image getImage();

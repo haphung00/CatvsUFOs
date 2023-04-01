@@ -13,8 +13,6 @@ public class Main extends Application
 	{
 		MainView mainView = new MainView();
 		primaryStage = mainView.getStage();
-		
-		primaryStage.setTitle("Cats vs UFOs");
 		primaryStage.show();
 	}
 
