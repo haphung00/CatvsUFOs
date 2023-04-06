@@ -1,20 +1,16 @@
 package model;
 
-import javafx.scene.image.Image;
-
 public abstract class GameObject
 {
 	protected int row;
 	protected int col;
 	protected GameBoard gameBoard;
-	protected boolean isOnBoard;
 	
 	public GameObject(int row, int col, GameBoard gameBoard)
 	{
 		this.row = row;
 		this.col = col;
 		this.gameBoard = gameBoard;
-		isOnBoard = true;
 	}
 	
 	public int getRow()
@@ -27,15 +23,30 @@ public abstract class GameObject
 		return col;
 	}
 	
-	public boolean getOnBoard()
+	@Override
+	public int hashCode()
 	{
-		return isOnBoard;
+		return 17 * row + 19 * col;
 	}
-	
-	public void setOffBoard()
+
+	@Override
+	public boolean equals(Object otherGameObject)
 	{
-		this.isOnBoard = false;
-	}
+		if (!(otherGameObject instanceof GameObject)) {
+			return false;
+		}
+		
+		if (otherGameObject == this) {
+			return true;
+		}
+		
+		GameObject gameObject = (GameObject) otherGameObject;
+		return gameObject.row == this.row && gameObject.col == this.col;		
+	}	
 	
-	public abstract Image getImage();
+	@Override
+	public String toString()
+	{
+		return String.format("%d %d", row, col);
+	}
 }

@@ -2,57 +2,103 @@ package view;
 
 import java.util.HashSet;
 
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import model.GameBoard;
-import model.GameObject;
 import model.Player;
 import model.Robot;
 import model.Rubble;
+import theme.CatvsUFOsThemeImage;
+import theme.ThemeImage;
 
 public class GameView extends Pane
 {
-	public static final int WIDTH = 600;
-	public static final int HEIGHT = 400;
+	public static final int WIDTH = 900;
+	public static final int HEIGHT = 600;
+
+	private SimpleDoubleProperty blockWidthProperty;
+	private SimpleDoubleProperty blockHeightProperty;
+
+	private static final int CIRCLE_RADIUS = 5;
+	private static final double ARROW_IMAGE_RATIO = 0.8;
+	private static final Color CIRCLE_COLOR = Color.HOTPINK;
 
 	private static final Color DARK_SHADE = Color.SKYBLUE;
 	private static final Color LIGHT_SHADE = Color.LIGHTBLUE;
-	private static final int PREF_BLOCK_SIZE = 20;
 
 	private GameBoard gameBoard;
-	
-	int i = 0;
+	private Player player;
+	private HashSet<Robot> robots;
+	private HashSet<Rubble> rubbles;
 
-	public GameView(GameBoard gb)
+	private ThemeImage theme;
+	private Image playerImage;
+	private Image lostPlayerImage;
+	private Image robotImage;
+	private Image headRobotImage;
+	private Image rubbleImage;
+
+	private Circle circleMouse;
+	private ImageView arrowImageViewMouse;
+
+	public GameView()
 	{
-		setPrefWidth(PREF_BLOCK_SIZE * GameBoard.COLS);
-		setPrefHeight(PREF_BLOCK_SIZE * GameBoard.ROWS);
+		setPrefWidth(WIDTH);
+		setPrefHeight(HEIGHT);
 
-		gameBoard = gb;
+		blockWidthProperty = new SimpleDoubleProperty();
+		blockWidthProperty.bind(widthProperty().divide(GameBoard.COLS));
+		blockHeightProperty = new SimpleDoubleProperty();
+		blockHeightProperty.bind(heightProperty().divide(GameBoard.ROWS));
+
+		gameBoard = new GameBoard();
+
+		theme = new CatvsUFOsThemeImage();
+		playerImage = theme.getPlayerImage();
+		lostPlayerImage = theme.getLostPlayerImage();
+		robotImage = theme.getRobotImage();
+		headRobotImage = theme.getHeadRobotImage();
+		rubbleImage = theme.getRubbleImage();
 
 		render();
 	}
-	
+
 	public void render()
 	{
 		getChildren().clear();
 		renderBoard();
-		renderPlayer();
 		renderRobot();
 		renderRubble();
+		renderPlayer();
+
+		circleMouse = new Circle(CIRCLE_RADIUS);
+		circleMouse.setFill(CIRCLE_COLOR);
+		circleMouse.setOpacity(0);
+		
+		arrowImageViewMouse = new ImageView(theme.getArrowImage());
+		arrowImageViewMouse.fitWidthProperty().bind(blockWidthProperty.multiply(ARROW_IMAGE_RATIO));
+		arrowImageViewMouse.fitHeightProperty().bind(blockHeightProperty.multiply(ARROW_IMAGE_RATIO));
+		arrowImageViewMouse.setOpacity(0);
+		
+		getChildren().addAll(circleMouse, arrowImageViewMouse);
 	}
 
 	public void renderBoard()
 	{
 		for (int r = 0; r < GameBoard.ROWS; r++) {
 			for (int c = 0; c < GameBoard.COLS; c++) {
-				Rectangle rectangle = new Rectangle(PREF_BLOCK_SIZE, PREF_BLOCK_SIZE);
+				Rectangle rectangle = new Rectangle();
 
-				rectangle.setX(c * PREF_BLOCK_SIZE);
-				rectangle.setY(r * PREF_BLOCK_SIZE);
+				rectangle.xProperty().bind(blockWidthProperty.multiply(c));
+				rectangle.yProperty().bind(blockHeightProperty.multiply(r));
+
+				rectangle.widthProperty().bind(blockWidthProperty);
+				rectangle.heightProperty().bind(blockHeightProperty);
 
 				if ((r + c) % 2 == 0) {
 					rectangle.setFill(DARK_SHADE);
@@ -65,54 +111,182 @@ public class GameView extends Pane
 			}
 		}
 	}
-	
-	public void renderPlayer()
-	{
-		Player player = gameBoard.getPlayer();
-		
-		Image playerImage = player.getImage();
-		ImageView playerImageView = new ImageView(playerImage);
-		
-		playerImageView.setFitWidth(PREF_BLOCK_SIZE);
-		playerImageView.setFitHeight(PREF_BLOCK_SIZE);
-		playerImageView.setX(player.getCol() * PREF_BLOCK_SIZE);
-		playerImageView.setY(player.getRow() * PREF_BLOCK_SIZE);
-
-		getChildren().add(playerImageView);
-	}
 
 	public void renderRobot()
 	{
-		HashSet<Robot> robots = gameBoard.getRobots();
-		System.out.println("render " + robots);
-		
-		for (GameObject robot : robots) {
-			Image robotImage = ((Robot) robot).getImage();
+		robots = gameBoard.getRobots();
+
+		for (Robot robot : robots) {
 			ImageView robotImageView = new ImageView(robotImage);
-			
-			robotImageView.setFitWidth(PREF_BLOCK_SIZE);
-			robotImageView.setFitHeight(PREF_BLOCK_SIZE);
-			robotImageView.setX(robot.getCol() * PREF_BLOCK_SIZE);
-			robotImageView.setY(robot.getRow() * PREF_BLOCK_SIZE);
+
+			if (robot.getType() == Robot.HEAD_ROBOT) {
+				robotImageView = new ImageView(headRobotImage);
+			}
+
+			robotImageView.xProperty().bind(blockWidthProperty.multiply(robot.getCol()));
+			robotImageView.yProperty().bind(blockHeightProperty.multiply(robot.getRow()));
+
+			robotImageView.fitWidthProperty().bind(blockWidthProperty);
+			robotImageView.fitHeightProperty().bind(blockHeightProperty);
 
 			getChildren().add(robotImageView);
 		}
 	}
-	
+
 	public void renderRubble()
 	{
-		HashSet<Rubble> rubbles = gameBoard.getRubbles();
-		
-		for (GameObject rubble : rubbles) {
-			Image rubbleImage = rubble.getImage();
+		rubbles = gameBoard.getRubbles();
+
+		for (Rubble rubble : rubbles) {
 			ImageView rubbleImageView = new ImageView(rubbleImage);
-			
-			rubbleImageView.setFitWidth(PREF_BLOCK_SIZE);
-			rubbleImageView.setFitHeight(PREF_BLOCK_SIZE);
-			rubbleImageView.setX(rubble.getCol() * PREF_BLOCK_SIZE);
-			rubbleImageView.setY(rubble.getRow() * PREF_BLOCK_SIZE);
+
+			rubbleImageView.xProperty().bind(blockWidthProperty.multiply(rubble.getCol()));
+			rubbleImageView.yProperty().bind(blockHeightProperty.multiply(rubble.getRow()));
+
+			rubbleImageView.fitWidthProperty().bind(blockWidthProperty);
+			rubbleImageView.fitHeightProperty().bind(blockHeightProperty);
 
 			getChildren().add(rubbleImageView);
 		}
+	}
+
+	public void renderPlayer()
+	{
+		player = gameBoard.getPlayer();
+
+		ImageView playerImageView = new ImageView(playerImage);
+
+		if (gameBoard.getState() == GameBoard.LOSE) {
+			playerImageView = new ImageView(lostPlayerImage);
+		}
+
+		playerImageView.xProperty().bind(blockWidthProperty.multiply(player.getCol()));
+		playerImageView.yProperty().bind(blockHeightProperty.multiply(player.getRow()));
+
+		playerImageView.fitWidthProperty().bind(blockWidthProperty);
+		playerImageView.fitHeightProperty().bind(blockHeightProperty);
+
+		getChildren().add(playerImageView);
+	}
+
+	public String displayArrow(double x, double y)
+	{
+		double xStartValue = getBlockWidth() * (gameBoard.getPlayer().getCol());
+		double xEndValue = getBlockWidth() * (gameBoard.getPlayer().getCol() + 1);
+
+		double yStartValue = getBlockHeight() * (gameBoard.getPlayer().getRow());
+		double yEndValue = getBlockHeight() * (gameBoard.getPlayer().getRow() + 1);
+
+		int betweenX = between(x, xStartValue, xEndValue);
+		int betweenY = between(y, yStartValue, yEndValue);
+
+		if (betweenX == 0 && betweenY == 0) {
+			circleMouse.setOpacity(1);
+			arrowImageViewMouse.setOpacity(0);
+			
+			circleMouse.setCenterX(x);
+			circleMouse.setCenterY(y);
+			
+			return "STAY";
+		}
+		else {
+			arrowImageViewMouse.setOpacity(1);
+			circleMouse.setOpacity(0);
+
+			arrowImageViewMouse.setTranslateX(x);
+			arrowImageViewMouse.setTranslateY(y);
+			
+			if (betweenX == 1 && betweenY == 0) {
+				// E
+				arrowImageViewMouse.setRotate(0);
+				return "E";
+			}
+			else if (betweenX == -1 && betweenY == 0) {
+				// W
+				arrowImageViewMouse.setRotate(-180);
+				return "W";
+			}
+			else if (betweenX == 0 && betweenY == -1) {
+				// N
+				arrowImageViewMouse.setRotate(-90);
+				return "N";
+			}
+			else if (betweenX == 0 && betweenY == 1) {
+				// S
+				arrowImageViewMouse.setRotate(90);
+				return "S";
+			}
+			else if (betweenX == -1 && betweenY == -1) {
+				// NW
+				arrowImageViewMouse.setRotate(-135);
+				return "NW";
+			}
+			else if (betweenX == 1 && betweenY == -1) {
+				// NE
+				arrowImageViewMouse.setRotate(-45);
+				return "NE";
+			}
+			else if (betweenX == -1 && betweenY == 1) {
+				// SW
+				arrowImageViewMouse.setRotate(-225);
+				return "SW";
+			}
+			else {
+				// SE
+				arrowImageViewMouse.setRotate(45);
+				return "SE";
+			}
+		}
+		/*
+		 * if e is in the same row && to the right: E 
+		 * if e is in the same row && to the
+		 * left: W if e is in the same col && upward: N 
+		 * if e is in the same col && downward: S 
+		 * if e is smaller than row && smaller than col: NW 
+		 * if e is smaller than row && larger than col: NE 
+		 * if e is larger than row && && larger than col: SE 
+		 * if e is larger than row && smaller than col: SW
+		 */
+	}
+
+	/**
+	 * @param  value      given value to check if it is between the two given values
+	 * @param  startValue the starting point of the range
+	 * @param  endValue   the ending point of the range
+	 * 
+	 * @return            -1 if {@value} is smaller than the range, 1 if {@value} is
+	 *                    larger than the range, and 0 if {@value} is in the range
+	 */
+	private int between(double value, double startValue, double endValue)
+	{
+		if (value < startValue) {
+			return -1;
+		}
+		else if (value >= startValue && value <= endValue) {
+			return 0;
+		}
+		else {
+			return 1;
+		}
+	}
+
+	public void setThemeImage(ThemeImage newTheme)
+	{
+		theme = newTheme;
+	}
+
+	public GameBoard getGameBoard()
+	{
+		return gameBoard;
+	}
+
+	public double getBlockWidth()
+	{
+		return blockWidthProperty.doubleValue();
+	}
+
+	public double getBlockHeight()
+	{
+		return blockHeightProperty.doubleValue();
 	}
 }

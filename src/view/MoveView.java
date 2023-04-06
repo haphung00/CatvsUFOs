@@ -25,4 +25,19 @@ public class MoveView extends HBox
 		safeTeleportButton.setMaxWidth(Double.POSITIVE_INFINITY);
 		waitForRobotsButton.setMaxWidth(Double.POSITIVE_INFINITY);
 	}
+
+	public Button getTeleportButton()
+	{
+		return teleportButton;
+	}
+
+	public Button getSafeTeleportButton()
+	{
+		return safeTeleportButton;
+	}
+
+	public Button getWaitForRobotsButton()
+	{
+		return waitForRobotsButton;
+	}
 }

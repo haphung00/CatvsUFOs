@@ -1,157 +1,124 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Random;
 
 public class GameBoard
 {
-	public static final int MOVE = 1;
-	public static final int TELEPORT = 2;
-
 	public static final int ROWS = 30;
 	public static final int COLS = 45;
 
-	public static final int SCORE_UNIT = 10;
+	private static final int SCORE_UNIT = 20;
 
-	private static final int ROBOT_NUM = 10;
-	private static final int HEAD_ROBOT_NUM = 2;
+	public static final int CONTINUING = 0;
+	public static final int WIN = 1;
+	public static final int LOSE = 2;
+
+	private static int level = 1;
+	private static int robotNum;
+	private static int headRobotNum;
 
 	private int score;
-	private boolean isLost;
+	private int robotMaxMove;
+	private int state;
 
-	private GameObject[][] board;
 	private Player player;
-	private ArrayList<Robot> robots;
-	private ArrayList<Rubble> rubbles;
+	private HashSet<Robot> robots;
+	private HashSet<Rubble> rubbles;
 
 	Random random = new Random();
 
 	public static boolean isValidPosition(int row, int col)
 	{
-		if (isValidRow(row) && isValidCol(col)) {
+		if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
 			return true;
 		}
 		return false;
 	}
 
-	public static boolean isValidRow(int row)
+	public void movePlayer(int typeOfMovement, int row, int col)
 	{
-		if (row >= 0 && row < ROWS) {
-			return true;
-		}
-		return false;
+		player.updatePosition(typeOfMovement, row, col);
 	}
 
-	public static boolean isValidCol(int col)
+	@SuppressWarnings("unlikely-arg-type")
+	public void updateRobots()
 	{
-		if (col >= 0 && col < COLS) {
-			return true;
-		}
-		return false;
-	}
+		HashSet<Robot> newRobots = new HashSet<>();
 
-	public void play(int option, int rowStep, int colStep)
-	{
-		if (!isGameOver()) {
-			if (option == 1) {
-				player.move(rowStep, colStep);
+		for (Robot robot : robots) {
+			robot.updateMove(player.row, player.col);
+
+			// handle collision with player
+			if (robot.row == player.row && robot.col == player.col) {
+				setState(GameBoard.LOSE);
+			}
+
+			// handle collision with rubbles and other robots
+
+			if (!newRobots.contains(robot) && !rubbles.contains(robot)) {
+				newRobots.add(robot);
 			}
 			else {
-				player.teleport();
+				if (newRobots.contains(robot)) {
+					rubbles.add(new Rubble(robot.getRow(), robot.getCol(), this));
+					newRobots.remove(robot);
+					score += 2 * SCORE_UNIT;
+				}
+				else {
+					score += SCORE_UNIT;
+				}
 			}
+		}
 
-			for (int i = 0 ; i < robots.size() ; i++) {
-				int removedRobots = robots.get(i).updateMove(player.getRow(), player.getCol());
-				i = i - removedRobots > 0 ? i - removedRobots : 0;
-			}
-		}
-		else {
-			System.out.println("over");
-			
-			if (isWin()) {
-				System.out.println("won");
-			}
-		}
+		robots = newRobots;
+
+		checkWin();
 	}
 
 	public GameBoard()
 	{
-		int score = 0;
-		isLost = false;
+		initializeBoard();
+	}
 
-		board = new GameObject[ROWS][COLS];
+	public void initializeBoard()
+	{
+		score = 0;
+		state = GameBoard.CONTINUING;
+
+		setRobotNumAccordingToLevel();
 
 		player = new Player(ROWS / 2, COLS / 2, this);
-		board[ROWS / 2][COLS / 2] = player;
 
-		robots = new ArrayList<>();
-		rubbles = new ArrayList<>();		
+		robots = new HashSet<>();
+		rubbles = new HashSet<>();
 
-		for (int i = 0 ; i < ROBOT_NUM ; i++) {
+		while (robots.size() < robotNum) {
 			int row = random.nextInt(ROWS - 1);
 			int col = random.nextInt(COLS - 1);
 
-			while (board[row][col] != null) {
-				row = random.nextInt(ROWS - 1);
-				col = random.nextInt(COLS - 1);
+			if (row != player.row && col != player.col) {
+				Robot robot = new Robot(row, col, Robot.ROBOT, this);
+				robots.add(robot);
 			}
-
-			Robot robot = new Robot(row, col, Robot.ROBOT, this);
-			robots.add(robot);
-			board[row][col] = robot;
 		}
 
-		for (int i = 0 ; i < HEAD_ROBOT_NUM ; i++) {
+		while (robots.size() < robotNum + headRobotNum) {
 			int row = random.nextInt(ROWS - 1);
 			int col = random.nextInt(COLS - 1);
 
-			while (board[row][col] != null) {
-				row = random.nextInt(ROWS - 1);
-				col = random.nextInt(COLS - 1);
+			if (row != player.row && col != player.col) {
+				Robot headRobot = new Robot(row, col, Robot.HEAD_ROBOT, this);
+				robots.add(headRobot);
 			}
-
-			Robot headRobot = new Robot(row, col, Robot.HEADROBOT, this);
-			robots.add(headRobot);
-			board[row][col] = headRobot;
 		}
 	}
 
-	public void robotvsRobotCollision(Robot thisRobot, Robot otherRobot)
-	{
-		addScore(thisRobot.type * SCORE_UNIT + otherRobot.type * SCORE_UNIT);
-		thisRobot.setOffBoard();
-		otherRobot.setOffBoard();
-		robots.remove(thisRobot);
-		robots.remove(otherRobot);
-		Rubble rubble = new Rubble(otherRobot.row, otherRobot.col, this);
-		rubbles.add(rubble);
-		board[rubble.row][rubble.col] = rubble;
-	}
-
-	public void robotvsRubbleCollision(Robot robot, Rubble rubble)
-	{
-		addScore(robot.type * SCORE_UNIT);
-		robot.setOffBoard();
-		robots.remove(robot);		
-	}
-
-	public void setLost()
-	{
-		isLost = true;
-	}
-	
-	public boolean isGameOver()
-	{
-		return isLost || isWin();
-	}
-
-	public boolean isWin()
+	public void checkWin()
 	{
 		if (robots.isEmpty()) {
-			return true;
+			setState(GameBoard.WIN);
 		}
-		return false;
 	}
 
 	public Player getPlayer()
@@ -159,17 +126,12 @@ public class GameBoard
 		return player;
 	}
 
-	public GameObject[][] getBoard()
-	{
-		return board;
-	}
-
-	public ArrayList<Robot> getRobots()
+	public HashSet<Robot> getRobots()
 	{
 		return robots;
 	}
 
-	public ArrayList<Rubble> getRubbles()
+	public HashSet<Rubble> getRubbles()
 	{
 		return rubbles;
 	}
@@ -179,8 +141,48 @@ public class GameBoard
 		return score;
 	}
 
-	public void addScore(int score)
+	public int getState()
 	{
-		this.score += score;
+		return state;
+	}
+
+	public void setState(int state)
+	{
+		this.state = state;
+	}
+
+	public int getLevel()
+	{
+		return level;
+	}
+
+	public void nextLevel()
+	{
+		level++;
+		initializeBoard();
+	}
+	
+	public void restart()
+	{
+		level = 1;
+		initializeBoard();
+	}
+	
+	public int getRobotMaxMove()
+	{
+		return robotMaxMove;
+	}
+
+	public void setRobotNumAccordingToLevel()
+	{
+		if (level == 1) {
+			robotNum = 6;
+			headRobotNum = 0;
+			robotMaxMove = Robot.HEAD_ROBOT;
+		}
+		else {
+			robotNum += 2;
+			headRobotNum += 1;
+		}
 	}
 }

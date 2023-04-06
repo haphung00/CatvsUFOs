@@ -20,11 +20,13 @@ public class MainView
 	{		
 		pane = new BorderPane();
 
-		gameBoard = new GameBoard();
-
-		gameView = new GameView(gameBoard);		
+		functionView = new FunctionView();
+		gameView = new GameView();		
 		moveView = new MoveView();
+		
+		gameBoard = gameView.getGameBoard();
 
+		pane.setTop(functionView);
 		pane.setCenter(gameView);
 		pane.setBottom(moveView);
 
