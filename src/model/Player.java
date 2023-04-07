@@ -59,7 +59,7 @@ public class Player extends GameObject
 		int row = random.nextInt(GameBoard.ROWS - 1);
 		int col = random.nextInt(GameBoard.COLS - 1);
 
-		while (row == this.row && col == this.col && isSafe(row, col)) {
+		while ((row == this.row && col == this.col) || !isSafe(row, col)) {
 			row = random.nextInt(GameBoard.ROWS - 1);
 			col = random.nextInt(GameBoard.COLS - 1);
 		}
@@ -75,7 +75,7 @@ public class Player extends GameObject
 			for (int c = col - maxDistance ; c <= col + maxDistance ; c++) {
 				if (GameBoard.isValidPosition(r, c)) {
 					GameObject obstacle = new Rubble(r, c, gameBoard);
-					if (gameBoard.getRobots().contains(obstacle) && gameBoard.getRubbles().contains(obstacle)) {
+					if (gameBoard.getRobots().contains(obstacle) || gameBoard.getRubbles().contains(obstacle)) {
 						return false;
 					}
 				}

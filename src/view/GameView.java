@@ -18,8 +18,8 @@ import theme.ThemeImage;
 
 public class GameView extends Pane
 {
-	public static final int WIDTH = 900;
-	public static final int HEIGHT = 600;
+	public static final int WIDTH = 800;
+	public static final int HEIGHT = 500;
 
 	private SimpleDoubleProperty blockWidthProperty;
 	private SimpleDoubleProperty blockHeightProperty;

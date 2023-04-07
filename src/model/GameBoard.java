@@ -5,8 +5,8 @@ import java.util.Random;
 
 public class GameBoard
 {
-	public static final int ROWS = 30;
-	public static final int COLS = 45;
+	public static final int ROWS = 20;
+	public static final int COLS = 30;
 
 	private static final int SCORE_UNIT = 20;
 
@@ -176,13 +176,15 @@ public class GameBoard
 	public void setRobotNumAccordingToLevel()
 	{
 		if (level == 1) {
-			robotNum = 6;
-			headRobotNum = 0;
+			robotNum = 8;
+			headRobotNum = 2;
 			robotMaxMove = Robot.HEAD_ROBOT;
 		}
 		else {
 			robotNum += 2;
 			headRobotNum += 1;
+			robotMaxMove = Robot.HEAD_ROBOT;
+			
 		}
 	}
 }

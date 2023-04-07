@@ -10,7 +10,6 @@ public class CatvsUFOsThemeImage extends ThemeImage
 	private static final String HEAD_ROBOT = "file:res/headrobot.png";
 	private static final String RUBBLE = "file:res/rubble.png";
 	
-
 	@Override
 	public Image getPlayerImage()
 	{
