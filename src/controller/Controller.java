@@ -2,139 +2,146 @@ package controller;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.GameBoard;
 import model.Player;
 import view.FunctionView;
 import view.GameView;
-import view.MainView;
+import view.MainStage;
 import view.MoveView;
-
+import view.RestartView;
 
 public class Controller
 {
-	private MainView mainView;
+	private MainStage mainView;
 	private FunctionView functionView;
 	private MoveView moveView;
 	private GameView gameView;
+	private RestartView restartView;
 	private GameBoard board;
 
 	private Stage stage;
 	private Scene scene;
 
-	private Timeline timeline;
-	
+	private Timeline waitForRobotsTimeline;
+	private Button buttonSetOnSafeMove;
+
+	private int moveType;
+
 	public Controller()
 	{
+		mainView = new MainStage();
 		initiate();
-		setKeyInput();
-		setMouseInput();
-		setUpMoveViewButton();
-		displayDirection();
 	}
 
-	public void initiate()
+	private void initiate()
 	{
-		mainView = new MainView();
 		functionView = mainView.getFunctionView();
 		moveView = mainView.getMoveView();
 		gameView = mainView.getGameView();
+		restartView = new RestartView();
 		board = mainView.getGameBoard();
 
 		stage = mainView.getStage();
 		scene = mainView.getScene();
+
+		setUpHandler();
+		moveView.updateSafeTeleportButton(board.getSafeTeleportTimes());
 	}
-	
-	public void setUpHandler()
+
+	private void setUpHandler()
 	{
 		setKeyInput();
 		setMouseInput();
 		setUpMoveViewButton();
+		displayDirection();
+		setUpFunctionView();
 	}
 
-	public void movePlayerAndUpdate(int typeOfMovement, int rowStep, int colStep)
+	private void movePlayerAndUpdate(int typeOfMovement, int rowStep, int colStep)
 	{
-		updateGameState();
-		board.movePlayer(typeOfMovement, rowStep, colStep);
-		updateGameState();
-		board.updateRobots();
-		functionView.updateStatistics(board.getScore(), board.getLevel());
-		updateGameState();
-		gameView.render();
-		functionView.updateStatistics(board.getScore(), board.getLevel());
+		if (board.movePlayer(typeOfMovement, rowStep, colStep)) {
+			updateGameState();
+			board.updateRobots();
+			functionView.updateStatistics(board.getScore(), board.getLevel());
+			updateGameState();
+			gameView.render();
+		}
+//		functionView.updateStatistics(board.getScore(), board.getLevel());
 	}
-	
-	public void playerWaitsForRobots()
+
+	private void playerWaitsForRobots()
 	{
-		  timeline = new Timeline(new KeyFrame(Duration.seconds(0.25), e -> {
-		        if (board.getState() == GameBoard.CONTINUING) {
-		            movePlayerAndUpdate(Player.STAY, 0, 0);
-		            gameView.render();
-		        }
-		    }));
-		    timeline.setCycleCount(Timeline.INDEFINITE);
-		    timeline.play();
+		waitForRobotsTimeline = new Timeline(new KeyFrame(Duration.seconds(0.25), e -> {
+			if (board.getState() == GameBoard.CONTINUING) {
+				movePlayerAndUpdate(Player.MOVE, 0, 0);
+				gameView.render();
+			}
+		}));
+		waitForRobotsTimeline.setCycleCount(Timeline.INDEFINITE);
+		waitForRobotsTimeline.play();
 	}
-	
-	public void setUpMoveViewButton()
+
+	private void setUpMoveViewButton()
 	{
-		moveView.setOnKeyPressed(e -> {
-			e.consume();
-		});
-		moveView.setOnKeyReleased(e -> {
-			e.consume();
-		});
-		moveView.setFocusTraversable(false);
-		
 		moveView.getTeleportButton().setOnMouseClicked(e -> {
 			movePlayerAndUpdate(Player.TELEPORT, 0, 0);
 		});
 		moveView.getTeleportButton().setFocusTraversable(false);
-		
+
 		moveView.getSafeTeleportButton().setOnMouseClicked(e -> {
-			movePlayerAndUpdate(Player.SAFE_TELEPORT, 0, 0);
+			if (board.getSafeTeleportTimes() > 0) {
+				movePlayerAndUpdate(Player.SAFE_TELEPORT, 0, 0);
+				board.decreaseSafeTeleportTimes();
+				moveView.updateSafeTeleportButton(board.getSafeTeleportTimes());
+			}
 		});
 		moveView.getSafeTeleportButton().setFocusTraversable(false);
-		
+
 		moveView.getWaitForRobotsButton().setOnMouseClicked(e -> {
 			playerWaitsForRobots();
 		});
 		moveView.getWaitForRobotsButton().setFocusTraversable(false);
 	}
 
-	public void setKeyInput()
+	private void setKeyInput()
 	{
+		updateMoveType();
+
 		scene.setOnKeyPressed(e -> {
 			switch (e.getCode()) {
 				case S:
-					movePlayerAndUpdate(Player.MOVE, 0, -1);
+					movePlayerAndUpdate(moveType, 0, -1);
 					break;
 				case W:
-					movePlayerAndUpdate(Player.MOVE, -1, -1);
+					movePlayerAndUpdate(moveType, -1, -1);
 					break;
 				case E:
-					movePlayerAndUpdate(Player.MOVE, -1, 0);
+					movePlayerAndUpdate(moveType, -1, 0);
 					break;
 				case R:
-					movePlayerAndUpdate(Player.MOVE, -1, 1);
+					movePlayerAndUpdate(moveType, -1, 1);
 					break;
 				case F:
-					movePlayerAndUpdate(Player.MOVE, 0, 1);
+					movePlayerAndUpdate(moveType, 0, 1);
 					break;
 				case C:
-					movePlayerAndUpdate(Player.MOVE, 1, 1);
+					movePlayerAndUpdate(moveType, 1, 1);
 					break;
 				case X:
-					movePlayerAndUpdate(Player.MOVE, 1, 0);
+					movePlayerAndUpdate(moveType, 1, 0);
 					break;
 				case Z:
-					movePlayerAndUpdate(Player.MOVE, 1, -1);
+					movePlayerAndUpdate(moveType, 1, -1);
 					break;
 				case D:
-					movePlayerAndUpdate(Player.STAY, 0, 0);
+					movePlayerAndUpdate(moveType, 0, 0);
 					break;
 				case SPACE:
 					movePlayerAndUpdate(Player.TELEPORT, 0, 0);
@@ -144,7 +151,7 @@ public class Controller
 		});
 	}
 
-	public void displayDirection()
+	private void displayDirection()
 	{
 		gameView.setOnMouseMoved(e -> {
 			gameView.setCursor(Cursor.NONE);
@@ -153,13 +160,22 @@ public class Controller
 			double y = e.getY();
 
 			gameView.displayArrow(x, y);
-
 		});
 	}
 
-	public void setMouseInput()
+	private void updateMoveType()
+	{
+		moveType = Player.MOVE;
+
+		if (board.getPlayer().getIsOnSafeMode()) {
+			moveType = Player.SAFE_MOVE;
+		}
+	}
+
+	private void setMouseInput()
 	{
 		gameView.setOnMouseClicked(e -> {
+
 			gameView.setCursor(Cursor.NONE);
 
 			double x = e.getX();
@@ -169,57 +185,107 @@ public class Controller
 
 			switch (direction) {
 				case "W":
-					movePlayerAndUpdate(Player.MOVE, 0, -1);
+					movePlayerAndUpdate(moveType, 0, -1);
 					break;
 				case "NW":
-					movePlayerAndUpdate(Player.MOVE, -1, -1);
+					movePlayerAndUpdate(moveType, -1, -1);
 					break;
 				case "N":
-					movePlayerAndUpdate(Player.MOVE, -1, 0);
+					movePlayerAndUpdate(moveType, -1, 0);
 					break;
 				case "NE":
-					movePlayerAndUpdate(Player.MOVE, -1, 1);
+					movePlayerAndUpdate(moveType, -1, 1);
 					break;
 				case "E":
-					movePlayerAndUpdate(Player.MOVE, 0, 1);
+					movePlayerAndUpdate(moveType, 0, 1);
 					break;
 				case "SE":
-					movePlayerAndUpdate(Player.MOVE, 1, 1);
+					movePlayerAndUpdate(moveType, 1, 1);
 					break;
 				case "S":
-					movePlayerAndUpdate(Player.MOVE, 1, 0);
+					movePlayerAndUpdate(moveType, 1, 0);
 					break;
 				case "SW":
-					movePlayerAndUpdate(Player.MOVE, 1, -1);
+					movePlayerAndUpdate(moveType, 1, -1);
 					break;
 				case "STAY":
-					movePlayerAndUpdate(Player.STAY, 0, 0);
+					movePlayerAndUpdate(moveType, 0, 0);
 					break;
 				default:
 			}
 		});
 	}
 
-	public void updateGameState()
+	private void updateGameState()
 	{
-		if (board.getState() == GameBoard.LOSE) {
-			if (timeline != null) {
-				timeline.stop();
+		if (board.getState() != GameBoard.CONTINUING) {
+			if (waitForRobotsTimeline != null) {
+				waitForRobotsTimeline.stop();
 			}
-			
+		}
+
+		if (board.getState() == GameBoard.LOSE) {
 			scene.setOnKeyPressed(null);
 			gameView.setOnMouseClicked(null);
 			moveView.getTeleportButton().setOnMouseClicked(null);
 			moveView.getSafeTeleportButton().setOnMouseClicked(null);
 			moveView.getWaitForRobotsButton().setOnMouseClicked(null);
-		}
 
-		if (board.getState() == GameBoard.WIN) {
-			if (timeline != null) {
-				timeline.stop();
-			}
-			board.nextLevel();
+			new Thread(() -> {
+				try {
+					Thread.sleep(2000);
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				Platform.runLater(() -> {
+					if (!restartView.getRestartDialog().isShowing()) {
+						restartView.getRestartDialog().showAndWait().ifPresent(buttonType -> {
+							if (buttonType.getButtonData() == ButtonData.YES) {
+								board.restart();
+								initiate();
+								gameView.render();
+								setUpFunctionView();
+								functionView.updateStatistics(board.getScore(), board.getLevel());
+							}
+							else {
+								System.exit(-1);
+							}
+						});
+					}
+				});
+			}).start();
+
 		}
+		else if (board.getState() == GameBoard.WIN) {
+			gameView.render();
+
+			new Thread(() -> {
+				try {
+					Thread.sleep(2000);
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				Platform.runLater(() -> {
+					board.nextLevel();
+					gameView.render();
+					functionView.updateStatistics(board.getScore(), board.getLevel());
+				});
+			}).start();
+		}
+	}
+
+	public void setUpFunctionView()
+	{
+		buttonSetOnSafeMove = functionView.getSafeMoveButton();
+		buttonSetOnSafeMove.setOnMouseClicked(e -> {
+			board.getPlayer().setOnSafeMode(!board.getPlayer().getIsOnSafeMode());
+			functionView.updateSafeMoveButton(board.getPlayer().getIsOnSafeMode());
+			updateMoveType();
+			board.setScoreUnit(board.getPlayer().getIsOnSafeMode());
+		});
+		functionView.updateStatistics(board.getScore(), board.getLevel());
 	}
 
 	public Stage getStage()

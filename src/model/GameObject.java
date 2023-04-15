@@ -1,6 +1,6 @@
 package model;
 
-public abstract class GameObject
+public class GameObject
 {
 	protected int row;
 	protected int col;

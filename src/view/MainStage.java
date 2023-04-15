@@ -5,7 +5,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.GameBoard;
 
-public class MainView
+public class MainStage
 {
 	Stage stage;
 	Scene scene;
@@ -16,7 +16,7 @@ public class MainView
 
 	GameBoard gameBoard;
 
-	public MainView()
+	public MainStage()
 	{		
 		pane = new BorderPane();
 
@@ -35,8 +35,6 @@ public class MainView
 
 		stage.setTitle("Cats vs UFOs");
 		stage.setScene(scene);
-
-		gameView.requestFocus();
 	}
 
 	public Stage getStage()

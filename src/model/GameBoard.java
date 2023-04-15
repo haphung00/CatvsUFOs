@@ -9,6 +9,8 @@ public class GameBoard
 	public static final int COLS = 30;
 
 	private static final int SCORE_UNIT = 20;
+	private static final int SAFE_SCORE_UNIT = 10;
+	private static final int SAFE_TELEPORT_TIMES = 4;
 
 	public static final int CONTINUING = 0;
 	public static final int WIN = 1;
@@ -18,9 +20,11 @@ public class GameBoard
 	private static int robotNum;
 	private static int headRobotNum;
 
+	private int scoreUnit = SCORE_UNIT;
+
 	private int score;
-	private int robotMaxMove;
 	private int state;
+	private int safeTeleportTimes;
 
 	private Player player;
 	private HashSet<Robot> robots;
@@ -36,9 +40,9 @@ public class GameBoard
 		return false;
 	}
 
-	public void movePlayer(int typeOfMovement, int row, int col)
+	public boolean movePlayer(int typeOfMovement, int row, int col)
 	{
-		player.updatePosition(typeOfMovement, row, col);
+		return player.updatePosition(typeOfMovement, row, col);
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
@@ -63,10 +67,10 @@ public class GameBoard
 				if (newRobots.contains(robot)) {
 					rubbles.add(new Rubble(robot.getRow(), robot.getCol(), this));
 					newRobots.remove(robot);
-					score += 2 * SCORE_UNIT;
+					score += 2 * scoreUnit;
 				}
 				else {
-					score += SCORE_UNIT;
+					score += scoreUnit;
 				}
 			}
 		}
@@ -83,8 +87,8 @@ public class GameBoard
 
 	public void initializeBoard()
 	{
-		score = 0;
 		state = GameBoard.CONTINUING;
+		safeTeleportTimes = SAFE_TELEPORT_TIMES;
 
 		setRobotNumAccordingToLevel();
 
@@ -161,30 +165,44 @@ public class GameBoard
 		level++;
 		initializeBoard();
 	}
-	
+
 	public void restart()
 	{
 		level = 1;
+		score = 0;
 		initializeBoard();
 	}
-	
-	public int getRobotMaxMove()
+
+	public void setScoreUnit(boolean isOnSafeMode)
 	{
-		return robotMaxMove;
+		if (isOnSafeMode) {
+			scoreUnit = SAFE_SCORE_UNIT;
+		}
+		else {
+			scoreUnit = SCORE_UNIT;
+		}
 	}
 
 	public void setRobotNumAccordingToLevel()
 	{
 		if (level == 1) {
-			robotNum = 8;
-			headRobotNum = 2;
-			robotMaxMove = Robot.HEAD_ROBOT;
+			robotNum = 7;
+			headRobotNum = 0;
 		}
 		else {
 			robotNum += 2;
 			headRobotNum += 1;
-			robotMaxMove = Robot.HEAD_ROBOT;
-			
+
 		}
+	}
+
+	public int getSafeTeleportTimes()
+	{
+		return safeTeleportTimes;
+	}
+
+	public void decreaseSafeTeleportTimes()
+	{
+		safeTeleportTimes--;
 	}
 }

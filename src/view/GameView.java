@@ -79,13 +79,51 @@ public class GameView extends Pane
 		circleMouse = new Circle(CIRCLE_RADIUS);
 		circleMouse.setFill(CIRCLE_COLOR);
 		circleMouse.setOpacity(0);
-		
+
 		arrowImageViewMouse = new ImageView(theme.getArrowImage());
 		arrowImageViewMouse.fitWidthProperty().bind(blockWidthProperty.multiply(ARROW_IMAGE_RATIO));
 		arrowImageViewMouse.fitHeightProperty().bind(blockHeightProperty.multiply(ARROW_IMAGE_RATIO));
 		arrowImageViewMouse.setOpacity(0);
-		
+
 		getChildren().addAll(circleMouse, arrowImageViewMouse);
+
+		renderEndNotice();
+	}
+
+	public void renderEndNotice()
+	{
+		int playerRow = gameBoard.getPlayer().getRow();
+		int playerCol = gameBoard.getPlayer().getCol();
+		int gameState = gameBoard.getState();
+
+		if (gameState == GameBoard.WIN) {
+			if (playerCol < GameBoard.COLS / 2) {
+				ImageView winLeftView = new ImageView(theme.getLeftWin());
+				winLeftView.xProperty().bind(blockWidthProperty.multiply(playerCol + 0.5));
+				winLeftView.yProperty().bind(blockHeightProperty.multiply(playerRow - 1));
+				getChildren().add(winLeftView);
+			}
+			else {
+				ImageView winRightView = new ImageView(theme.getRightWin());
+				winRightView.xProperty().bind(blockWidthProperty.multiply(playerCol - 2));
+				winRightView.yProperty().bind(blockHeightProperty.multiply(playerRow - 1.5));
+				getChildren().add(winRightView);
+			}
+		}
+		else if (gameState == GameBoard.LOSE) {
+			if (playerCol < GameBoard.COLS / 2) {
+				ImageView loseLeftView = new ImageView(theme.getLeftLose());
+				loseLeftView.xProperty().bind(blockWidthProperty.multiply(playerCol + 0.5));
+				loseLeftView.yProperty().bind(blockHeightProperty.multiply(playerRow - 1));
+				getChildren().add(loseLeftView);
+			}
+			else {
+				ImageView loseRightView = new ImageView(theme.getRightLose());
+				loseRightView.xProperty().bind(blockWidthProperty.multiply(playerCol - 2));
+				loseRightView.yProperty().bind(blockHeightProperty.multiply(playerRow - 1.5));
+				getChildren().add(loseRightView);
+			}
+		}
 	}
 
 	public void renderBoard()
@@ -183,70 +221,64 @@ public class GameView extends Pane
 		if (betweenX == 0 && betweenY == 0) {
 			circleMouse.setOpacity(1);
 			arrowImageViewMouse.setOpacity(0);
-			
+
 			circleMouse.setCenterX(x);
 			circleMouse.setCenterY(y);
-			
+
 			return "STAY";
 		}
 		else {
-			arrowImageViewMouse.setOpacity(1);
-			circleMouse.setOpacity(0);
+			if (x >= 0 && x < getWidth() && y >= 0 && y < getHeight()) {
+				arrowImageViewMouse.setOpacity(1);
+				circleMouse.setOpacity(0);
 
-			arrowImageViewMouse.setTranslateX(x);
-			arrowImageViewMouse.setTranslateY(y);
+				arrowImageViewMouse.setTranslateX(x);
+				arrowImageViewMouse.setTranslateY(y);
+
+				if (betweenX == 1 && betweenY == 0) {
+					// E
+					arrowImageViewMouse.setRotate(0);
+					return "E";
+				}
+				else if (betweenX == -1 && betweenY == 0) {
+					// W
+					arrowImageViewMouse.setRotate(-180);
+					return "W";
+				}
+				else if (betweenX == 0 && betweenY == -1) {
+					// N
+					arrowImageViewMouse.setRotate(-90);
+					return "N";
+				}
+				else if (betweenX == 0 && betweenY == 1) {
+					// S
+					arrowImageViewMouse.setRotate(90);
+					return "S";
+				}
+				else if (betweenX == -1 && betweenY == -1) {
+					// NW
+					arrowImageViewMouse.setRotate(-135);
+					return "NW";
+				}
+				else if (betweenX == 1 && betweenY == -1) {
+					// NE
+					arrowImageViewMouse.setRotate(-45);
+					return "NE";
+				}
+				else if (betweenX == -1 && betweenY == 1) {
+					// SW
+					arrowImageViewMouse.setRotate(-225);
+					return "SW";
+				}
+				else {
+					// SE
+					arrowImageViewMouse.setRotate(45);
+					return "SE";
+				}
+			}
 			
-			if (betweenX == 1 && betweenY == 0) {
-				// E
-				arrowImageViewMouse.setRotate(0);
-				return "E";
-			}
-			else if (betweenX == -1 && betweenY == 0) {
-				// W
-				arrowImageViewMouse.setRotate(-180);
-				return "W";
-			}
-			else if (betweenX == 0 && betweenY == -1) {
-				// N
-				arrowImageViewMouse.setRotate(-90);
-				return "N";
-			}
-			else if (betweenX == 0 && betweenY == 1) {
-				// S
-				arrowImageViewMouse.setRotate(90);
-				return "S";
-			}
-			else if (betweenX == -1 && betweenY == -1) {
-				// NW
-				arrowImageViewMouse.setRotate(-135);
-				return "NW";
-			}
-			else if (betweenX == 1 && betweenY == -1) {
-				// NE
-				arrowImageViewMouse.setRotate(-45);
-				return "NE";
-			}
-			else if (betweenX == -1 && betweenY == 1) {
-				// SW
-				arrowImageViewMouse.setRotate(-225);
-				return "SW";
-			}
-			else {
-				// SE
-				arrowImageViewMouse.setRotate(45);
-				return "SE";
-			}
+			return "NO";
 		}
-		/*
-		 * if e is in the same row && to the right: E 
-		 * if e is in the same row && to the
-		 * left: W if e is in the same col && upward: N 
-		 * if e is in the same col && downward: S 
-		 * if e is smaller than row && smaller than col: NW 
-		 * if e is smaller than row && larger than col: NE 
-		 * if e is larger than row && && larger than col: SE 
-		 * if e is larger than row && smaller than col: SW
-		 */
 	}
 
 	/**
