@@ -20,14 +20,16 @@ import view.MainView;
 import view.MoveView;
 import view.RankingView;
 import view.RestartView;
+import view.UserNameView;
 
 public class Controller
 {
 	private InstructionView instructionView;
 	private RankingView rankingView;
-	
+	private UserNameView userNameView;
+
 	private LeaderBoard leaderBoard;
-	
+
 	private MainView mainView;
 	private FunctionView functionView;
 	private MoveView moveView;
@@ -42,25 +44,28 @@ public class Controller
 	private Button buttonSetOnSafeMove;
 
 	private int moveType;
+	private String userName;
 
 	public Controller()
 	{
 		instructionView = new InstructionView();
-		instructionView.show();
-	
+
 		rankingView = new RankingView();
 		leaderBoard = rankingView.getLeaderBoard();
-		
+		restartView = new RestartView();
+
 		mainView = new MainView();
 		initiate();
 	}
 
 	private void initiate()
 	{
+		askForUserName();
+		instructionView.show();
+
 		functionView = mainView.getFunctionView();
 		moveView = mainView.getMoveView();
 		gameView = mainView.getGameView();
-		restartView = new RestartView();
 		board = mainView.getGameBoard();
 
 		stage = mainView.getStage();
@@ -88,7 +93,6 @@ public class Controller
 			updateGameState();
 			gameView.render();
 		}
-//		functionView.updateStatistics(board.getScore(), board.getLevel());
 	}
 
 	private void playerWaitsForRobots()
@@ -254,7 +258,6 @@ public class Controller
 					e.printStackTrace();
 				}
 				Platform.runLater(() -> {
-					
 					displayLeaderBoard();
 				});
 			}).start();
@@ -278,11 +281,11 @@ public class Controller
 			}).start();
 		}
 	}
-	
+
 	private void displayRestartView()
 	{
-		if (!restartView.getRestartDialog().isShowing()) {
-			restartView.getRestartDialog().showAndWait().ifPresent(buttonType -> {
+		if (!restartView.getDialog().isShowing()) {
+			restartView.getDialog().showAndWait().ifPresent(buttonType -> {
 				if (buttonType.getButtonData() == ButtonData.YES) {
 					board.restart();
 					initiate();
@@ -295,13 +298,14 @@ public class Controller
 				}
 			});
 		}
+
 	}
-	
+
 	private void displayLeaderBoard()
 	{
 		logGameResult();
-		
-		rankingView.getStage().showAndWait();		
+
+		rankingView.getStage().showAndWait();
 		if (!rankingView.getStage().isShowing()) {
 			displayRestartView();
 		}
@@ -309,11 +313,20 @@ public class Controller
 
 	private void logGameResult()
 	{
-		GameResult result = new GameResult("", board.getLevel(), board.getScore());
+		GameResult result = new GameResult(userName, board.getLevel(), board.getScore());
 		leaderBoard.add(result);
 	}
-	
-	public void setUpFunctionView()
+
+	private void askForUserName()
+	{
+		userNameView = new UserNameView();
+
+		userNameView.getDialog().showAndWait().ifPresent(e -> {
+			userName = userNameView.getDialog().getResult();
+		});
+	}
+
+	private void setUpFunctionView()
 	{
 		buttonSetOnSafeMove = functionView.getSafeMoveButton();
 		buttonSetOnSafeMove.setOnMouseClicked(e -> {

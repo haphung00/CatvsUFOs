@@ -1,6 +1,10 @@
 package view;
 
+import java.util.Comparator;
+
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -43,7 +47,12 @@ public class RankingView
 		scoreColumn.setCellValueFactory(new PropertyValueFactory<>("totalScore"));
 		
 		table.getColumns().addAll(nameColumn, levelColumn, scoreColumn);
-		table.setItems(FXCollections.observableList(leaderBoard.getResults()));
+		
+		ObservableList<GameResult> data = FXCollections.observableList(leaderBoard.getResults());
+		
+		table.setItems(data);
+//		table.getItems().sort(Comparator.comparing(result, GameResult::getLevel()).reversed());
+
 	}
 	
 	private void initiate()

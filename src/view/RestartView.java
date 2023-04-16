@@ -28,7 +28,7 @@ public class RestartView
 		});
 	}
 	
-	public Dialog<ButtonType> getRestartDialog()
+	public Dialog<ButtonType> getDialog()
 	{
 		return restartDialog;
 	}
