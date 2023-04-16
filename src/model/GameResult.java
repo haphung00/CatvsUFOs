@@ -31,34 +31,6 @@ public class GameResult implements Serializable, Comparable<GameResult>
 		return totalScore;
 	}
 
-	@Override
-	public int hashCode()
-	{
-		int total = 0;
-
-		for (int i = 0; i < userName.length(); i++) {
-			total += userName.charAt(i);
-		}
-
-		return 17 * total + 19 * totalScore + 21 * level;
-	}
-
-	@Override
-	public boolean equals(Object object)
-	{
-		if (!(object instanceof GameResult)) {
-			return false;
-		}
-
-		GameResult other = (GameResult) object;
-
-		if (other.level == level && other.totalScore == totalScore) {
-			return true;
-		}
-
-		return false;
-	}
-
 	// this method is poorly written. fix!
 	@Override
 	public int compareTo(GameResult otherResult)

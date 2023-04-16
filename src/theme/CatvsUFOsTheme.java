@@ -2,7 +2,7 @@ package theme;
 
 import javafx.scene.image.Image;
 
-public class CatvsUFOsThemeImage extends ThemeImage
+public class CatvsUFOsTheme extends Theme
 {
 	private static final String CAT = "file:res/cat.png";
 	private static final String ANGEL_CAT = "file:res/angelcat.png";

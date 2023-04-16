@@ -1,10 +1,7 @@
 package view;
 
-import java.util.Comparator;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -20,6 +17,7 @@ public class RankingView
 	private Stage stage;
 	private Scene scene;
 	private TableView<GameResult> table;
+	private ObservableList<GameResult> data;
 	
 	public RankingView()
 	{
@@ -48,10 +46,8 @@ public class RankingView
 		
 		table.getColumns().addAll(nameColumn, levelColumn, scoreColumn);
 		
-		ObservableList<GameResult> data = FXCollections.observableList(leaderBoard.getResults());
-		
+		data = FXCollections.observableList(leaderBoard.getResults());
 		table.setItems(data);
-//		table.getItems().sort(Comparator.comparing(result, GameResult::getLevel()).reversed());
 
 	}
 	
@@ -67,9 +63,9 @@ public class RankingView
 		stage.setTitle("Leaderboard");
 	}
 	
-	public void show()
+	public void update()
 	{
-		stage.show();
+		table.setItems(data);
 	}
 	
 	public Stage getStage()

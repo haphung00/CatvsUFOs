@@ -4,21 +4,21 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.image.ImageView;
-import theme.CatvsUFOsThemeImage;
-import theme.ThemeImage;
+import theme.Theme;
 
 public class RestartView
 {
-	Dialog<ButtonType> restartDialog;
+	private Dialog<ButtonType> restartDialog;
+	private Theme theme;
 
-	public RestartView()
+	public RestartView(Theme theme)
 	{
-		ThemeImage theme = new CatvsUFOsThemeImage();
+		this.theme = theme;
 		
 		restartDialog = new Dialog<>();
 		restartDialog.setTitle("Restart?");
 		restartDialog.setHeaderText("Restart?");
-		restartDialog.setGraphic(new ImageView(theme.getPlayerImage()));
+		restartDialog.setGraphic(new ImageView(this.theme.getPlayerImage()));
 
 		ButtonType restartButton = new ButtonType("Yes", ButtonData.YES);
 		ButtonType quitButton = new ButtonType("Quit", ButtonData.NO);

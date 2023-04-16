@@ -2,12 +2,12 @@ package model;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class LeaderBoard
 {
 	private static final String FILE_NAME = "ranking.dat";
-
 	private List<GameResult> leaderBoard;
 
 	@SuppressWarnings("unchecked")
@@ -25,6 +25,7 @@ public class LeaderBoard
 	public void add(GameResult gameResult)
 	{
 		leaderBoard.add(gameResult);
+		Collections.sort(leaderBoard);
 		save();
 	}
 

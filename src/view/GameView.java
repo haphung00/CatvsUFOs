@@ -13,8 +13,8 @@ import model.GameBoard;
 import model.Player;
 import model.Robot;
 import model.Rubble;
-import theme.CatvsUFOsThemeImage;
-import theme.ThemeImage;
+import theme.CatvsUFOsTheme;
+import theme.Theme;
 
 public class GameView extends Pane
 {
@@ -36,7 +36,7 @@ public class GameView extends Pane
 	private HashSet<Robot> robots;
 	private HashSet<Rubble> rubbles;
 
-	private ThemeImage theme;
+	private Theme theme;
 	private Image playerImage;
 	private Image lostPlayerImage;
 	private Image robotImage;
@@ -46,7 +46,7 @@ public class GameView extends Pane
 	private Circle circleMouse;
 	private ImageView arrowImageViewMouse;
 
-	public GameView()
+	public GameView(Theme theme)
 	{
 		setPrefWidth(WIDTH);
 		setPrefHeight(HEIGHT);
@@ -58,7 +58,7 @@ public class GameView extends Pane
 
 		gameBoard = new GameBoard();
 
-		theme = new CatvsUFOsThemeImage();
+		this.theme = theme;
 		playerImage = theme.getPlayerImage();
 		lostPlayerImage = theme.getLostPlayerImage();
 		robotImage = theme.getRobotImage();
@@ -302,7 +302,7 @@ public class GameView extends Pane
 		}
 	}
 
-	public void setThemeImage(ThemeImage newTheme)
+	public void setThemeImage(Theme newTheme)
 	{
 		theme = newTheme;
 	}

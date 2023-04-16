@@ -2,7 +2,7 @@ package theme;
 
 import javafx.scene.image.Image;
 
-public abstract class ThemeImage
+public abstract class Theme
 {
 	private static final String ARROW = "file:res/arrow.png";
 	

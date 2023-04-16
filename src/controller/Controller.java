@@ -13,6 +13,8 @@ import model.GameBoard;
 import model.GameResult;
 import model.LeaderBoard;
 import model.Player;
+import theme.CatvsUFOsTheme;
+import theme.Theme;
 import view.FunctionView;
 import view.GameView;
 import view.InstructionView;
@@ -46,15 +48,19 @@ public class Controller
 	private int moveType;
 	private String userName;
 
+	private Theme theme;
+
 	public Controller()
 	{
-		instructionView = new InstructionView();
+		theme = new CatvsUFOsTheme();
 
+		instructionView = new InstructionView();
+		userNameView = new UserNameView(theme);
 		rankingView = new RankingView();
 		leaderBoard = rankingView.getLeaderBoard();
-		restartView = new RestartView();
+		restartView = new RestartView(theme);
 
-		mainView = new MainView();
+		mainView = new MainView(theme);
 		initiate();
 	}
 
@@ -72,7 +78,11 @@ public class Controller
 		scene = mainView.getScene();
 
 		setUpHandler();
+
+		functionView.updateStatistics(board.getScore(), board.getLevel());
 		moveView.updateSafeTeleportButton(board.getSafeTeleportTimes());
+		
+		gameView.render();
 	}
 
 	private void setUpHandler()
@@ -258,6 +268,7 @@ public class Controller
 					e.printStackTrace();
 				}
 				Platform.runLater(() -> {
+					logGameResult();
 					displayLeaderBoard();
 				});
 			}).start();
@@ -290,8 +301,6 @@ public class Controller
 					board.restart();
 					initiate();
 					gameView.render();
-					setUpFunctionView();
-					functionView.updateStatistics(board.getScore(), board.getLevel());
 				}
 				else {
 					System.exit(-1);
@@ -303,11 +312,13 @@ public class Controller
 
 	private void displayLeaderBoard()
 	{
-		logGameResult();
-
-		rankingView.getStage().showAndWait();
+		rankingView.update();
+		
 		if (!rankingView.getStage().isShowing()) {
-			displayRestartView();
+			rankingView.getStage().showAndWait();
+			if (!rankingView.getStage().isShowing()) {
+				displayRestartView();
+			}
 		}
 	}
 
@@ -319,8 +330,6 @@ public class Controller
 
 	private void askForUserName()
 	{
-		userNameView = new UserNameView();
-
 		userNameView.getDialog().showAndWait().ifPresent(e -> {
 			userName = userNameView.getDialog().getResult();
 		});

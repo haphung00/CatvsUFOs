@@ -4,27 +4,24 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.GameBoard;
+import theme.Theme;
 
 public class MainView
 {
-	Stage stage;
-	Scene scene;
-	BorderPane pane;
-	FunctionView functionView;
-	GameView gameView;
-	MoveView moveView;
+	private Stage stage;
+	private Scene scene;
+	private BorderPane pane;
+	private GameView gameView;
+	private FunctionView functionView;
+	private MoveView moveView;
 
-	GameBoard gameBoard;
-
-	public MainView()
+	public MainView(Theme theme)
 	{		
 		pane = new BorderPane();
 
+		gameView = new GameView(theme);		
 		functionView = new FunctionView();
-		gameView = new GameView();		
 		moveView = new MoveView();
-		
-		gameBoard = gameView.getGameBoard();
 
 		pane.setTop(functionView);
 		pane.setCenter(gameView);
@@ -69,6 +66,6 @@ public class MainView
 
 	public GameBoard getGameBoard()
 	{
-		return gameBoard;
+		return gameView.getGameBoard();
 	}
 }

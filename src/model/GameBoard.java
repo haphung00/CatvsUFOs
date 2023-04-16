@@ -162,6 +162,7 @@ public class GameBoard
 
 	public void nextLevel()
 	{
+		safeTeleportTimes = SAFE_TELEPORT_TIMES;
 		level++;
 		initializeBoard();
 	}
