@@ -10,16 +10,25 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.GameBoard;
+import model.GameResult;
+import model.LeaderBoard;
 import model.Player;
 import view.FunctionView;
 import view.GameView;
-import view.MainStage;
+import view.InstructionView;
+import view.MainView;
 import view.MoveView;
+import view.RankingView;
 import view.RestartView;
 
 public class Controller
 {
-	private MainStage mainView;
+	private InstructionView instructionView;
+	private RankingView rankingView;
+	
+	private LeaderBoard leaderBoard;
+	
+	private MainView mainView;
 	private FunctionView functionView;
 	private MoveView moveView;
 	private GameView gameView;
@@ -36,7 +45,13 @@ public class Controller
 
 	public Controller()
 	{
-		mainView = new MainStage();
+		instructionView = new InstructionView();
+		instructionView.show();
+	
+		rankingView = new RankingView();
+		leaderBoard = rankingView.getLeaderBoard();
+		
+		mainView = new MainView();
 		initiate();
 	}
 
@@ -233,26 +248,14 @@ public class Controller
 
 			new Thread(() -> {
 				try {
-					Thread.sleep(2000);
+					Thread.sleep(1000);
 				}
 				catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 				Platform.runLater(() -> {
-					if (!restartView.getRestartDialog().isShowing()) {
-						restartView.getRestartDialog().showAndWait().ifPresent(buttonType -> {
-							if (buttonType.getButtonData() == ButtonData.YES) {
-								board.restart();
-								initiate();
-								gameView.render();
-								setUpFunctionView();
-								functionView.updateStatistics(board.getScore(), board.getLevel());
-							}
-							else {
-								System.exit(-1);
-							}
-						});
-					}
+					
+					displayLeaderBoard();
 				});
 			}).start();
 
@@ -262,7 +265,7 @@ public class Controller
 
 			new Thread(() -> {
 				try {
-					Thread.sleep(2000);
+					Thread.sleep(1000);
 				}
 				catch (InterruptedException e) {
 					e.printStackTrace();
@@ -275,7 +278,41 @@ public class Controller
 			}).start();
 		}
 	}
+	
+	private void displayRestartView()
+	{
+		if (!restartView.getRestartDialog().isShowing()) {
+			restartView.getRestartDialog().showAndWait().ifPresent(buttonType -> {
+				if (buttonType.getButtonData() == ButtonData.YES) {
+					board.restart();
+					initiate();
+					gameView.render();
+					setUpFunctionView();
+					functionView.updateStatistics(board.getScore(), board.getLevel());
+				}
+				else {
+					System.exit(-1);
+				}
+			});
+		}
+	}
+	
+	private void displayLeaderBoard()
+	{
+		logGameResult();
+		
+		rankingView.getStage().showAndWait();		
+		if (!rankingView.getStage().isShowing()) {
+			displayRestartView();
+		}
+	}
 
+	private void logGameResult()
+	{
+		GameResult result = new GameResult("", board.getLevel(), board.getScore());
+		leaderBoard.add(result);
+	}
+	
 	public void setUpFunctionView()
 	{
 		buttonSetOnSafeMove = functionView.getSafeMoveButton();

@@ -5,7 +5,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.GameBoard;
 
-public class MainStage
+public class MainView
 {
 	Stage stage;
 	Scene scene;
@@ -16,7 +16,7 @@ public class MainStage
 
 	GameBoard gameBoard;
 
-	public MainStage()
+	public MainView()
 	{		
 		pane = new BorderPane();
 

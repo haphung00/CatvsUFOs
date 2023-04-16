@@ -7,9 +7,9 @@ public class GameBoard
 {
 	public static final int ROWS = 20;
 	public static final int COLS = 30;
-
-	private static final int SCORE_UNIT = 20;
-	private static final int SAFE_SCORE_UNIT = 10;
+	public static final int SCORE_UNIT = 20;
+	public static final int SAFE_SCORE_UNIT = 10;
+	
 	private static final int SAFE_TELEPORT_TIMES = 4;
 
 	public static final int CONTINUING = 0;
