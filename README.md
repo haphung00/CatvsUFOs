@@ -1,6 +1,6 @@
 # CatvsUFOs
 
-** CatvsUFOs - How to Run **
+CatvsUFOs - How to Run
 
 1. Download CatvsUFOs.jar file
 2. Create a new project in Eclipse, and add the .jar file as an External Archive
