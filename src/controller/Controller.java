@@ -81,7 +81,7 @@ public class Controller
 
 		functionView.updateStatistics(board.getScore(), board.getLevel());
 		moveView.updateSafeTeleportButton(board.getSafeTeleportTimes());
-		
+
 		gameView.render();
 	}
 
@@ -313,7 +313,7 @@ public class Controller
 	private void displayLeaderBoard()
 	{
 		rankingView.update();
-		
+
 		if (!rankingView.getStage().isShowing()) {
 			rankingView.getStage().showAndWait();
 			if (!rankingView.getStage().isShowing()) {
