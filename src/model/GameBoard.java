@@ -171,6 +171,8 @@ public class GameBoard
 	{
 		level = 1;
 		score = 0;
+		player.setOnSafeMode(false);
+		setScoreUnit(false);
 		initializeBoard();
 	}
 

@@ -301,6 +301,7 @@ public class Controller
 			restartView.getDialog().showAndWait().ifPresent(buttonType -> {
 				if (buttonType.getButtonData() == ButtonData.YES) {
 					board.restart();
+					functionView.updateSafeMoveButton(board.getPlayer().getIsOnSafeMode());
 					initiate();
 					gameView.render();
 				}
