@@ -259,6 +259,8 @@ public class Controller
 			moveView.getTeleportButton().setOnMouseClicked(null);
 			moveView.getSafeTeleportButton().setOnMouseClicked(null);
 			moveView.getWaitForRobotsButton().setOnMouseClicked(null);
+			
+			logGameResult();
 
 			new Thread(() -> {
 				try {
@@ -268,7 +270,6 @@ public class Controller
 					e.printStackTrace();
 				}
 				Platform.runLater(() -> {
-					logGameResult();
 					displayLeaderBoard();
 				});
 			}).start();
@@ -284,9 +285,10 @@ public class Controller
 				catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				board.nextLevel();
 				Platform.runLater(() -> {
-					board.nextLevel();
 					gameView.render();
+					moveView.updateSafeTeleportButton(board.getSafeTeleportTimes());
 					functionView.updateStatistics(board.getScore(), board.getLevel());
 				});
 			}).start();
@@ -313,7 +315,7 @@ public class Controller
 	private void displayLeaderBoard()
 	{
 		rankingView.update();
-
+		
 		if (!rankingView.getStage().isShowing()) {
 			rankingView.getStage().showAndWait();
 			if (!rankingView.getStage().isShowing()) {

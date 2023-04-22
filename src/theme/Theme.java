@@ -1,16 +1,18 @@
 package theme;
 
+import java.io.InputStream;
+
 import javafx.scene.image.Image;
 
 public abstract class Theme
 {
-	private static final String ARROW = "file:res/arrow.png";
+	private static final String ARROW = "/res/arrow.png";
 	
-	private static final String LEFT_WIN = "file:res/leftwin.png";
-	private static final String RIGHT_WIN = "file:res/rightwin.png";
-	private static final String LEFT_LOSE = "file:res/leftlose.png";
-	private static final String RIGHT_LOSE = "file:res/rightlose.png";
-	
+	private static final String LEFT_WIN = "/res/leftwin.png";
+	private static final String RIGHT_WIN = "/res/rightwin.png";
+	private static final String LEFT_LOSE = "/res/leftlose.png";
+	private static final String RIGHT_LOSE = "/res/rightlose.png";
+
 	public abstract Image getPlayerImage();
 	
 	public abstract Image getLostPlayerImage();
@@ -21,19 +23,31 @@ public abstract class Theme
 	
 	public abstract Image getRubbleImage();
 	
+	protected Image getImage(String fileName)
+	{
+		try {
+			InputStream stream = getClass().getResourceAsStream(fileName);
+			return new Image(stream);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public Image getArrowImage()
 	{
-		return new Image(ARROW);
+		return getImage(ARROW);
 	}
 	
 	public Image getLeftWin()
 	{
-		return new Image(LEFT_WIN);
+		return getImage(LEFT_WIN);
 	}
 	
 	public Image getRightWin()
 	{
-		return new Image(RIGHT_WIN);
+		return getImage(RIGHT_WIN);
 	}
 	
 	public Image getLeftLose()
@@ -43,6 +57,6 @@ public abstract class Theme
 	
 	public Image getRightLose()
 	{
-		return new Image(RIGHT_LOSE);
+		return getImage(RIGHT_LOSE);
 	}
 }

@@ -35,13 +35,13 @@ public class LeaderBoard
 		save();
 	}
 
-	public void save()
+	private void save()
 	{
 		try (ObjectOutputStream objectOutStream = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
 			objectOutStream.writeObject(leaderBoard);
 		}
 		catch (IOException e) {
-			// Handle exception
+			e.printStackTrace();
 		}
 	}
 

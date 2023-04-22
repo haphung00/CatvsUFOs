@@ -13,7 +13,6 @@ import model.GameBoard;
 import model.Player;
 import model.Robot;
 import model.Rubble;
-import theme.CatvsUFOsTheme;
 import theme.Theme;
 
 public class GameView extends Pane

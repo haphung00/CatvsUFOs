@@ -46,9 +46,7 @@ public class RankingView
 		
 		table.getColumns().addAll(nameColumn, levelColumn, scoreColumn);
 		
-		data = FXCollections.observableList(leaderBoard.getResults());
-		table.setItems(data);
-
+		update();
 	}
 	
 	private void initiate()
@@ -65,6 +63,7 @@ public class RankingView
 	
 	public void update()
 	{
+		data = FXCollections.observableList(leaderBoard.getResults());
 		table.setItems(data);
 	}
 	
